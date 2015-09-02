@@ -1,0 +1,147 @@
+This README explains the algorithm used to implement this program
+
+Explanation & Overview
+==============================
+
+This was first introduced by H.E. Dudeney and was first published in the July 1924 issue of Strand Magazine associated with the story of a Kidnapper’s ransom demand.
+
+Cryptarithmetic is a suitable example of Constraint Satisfaction Problem. Instead of providing description, a Cryptarithmetic problem can be better described by some constraints. The constraints of defining a Cryptarithmetic problem are as follows
+
+--Each letter or symbol represents only one and a unique digit throughout the problem.
+--When the digits replace letters or symbols, the resultant arithmetical operation must be correct.
+
+These two constraints lead to some other restrictions in the problem. Consider that, the base of the numbers is 10. Then there must be at most 10 unique symbols or letters in the problem. Otherwise, it would not be possible to assign a unique digit to each unique letter or symbol in the problem.
+
+To be semantically meaningful, a number must not begin with a zero. So, the letters at the beginning of each number should not correspond to zero.
+
+
+Program Logic
+=============================
+Error Checking
+Before we can apply any algorithm we need to check out that input entered by user is proper.
+1.	Total no. of distinct letters should be less or equal to 10.
+2.	Length of answer should not be lesser than length of any operand.
+3.	Length of answer can be only one more than any of the operand.
+There are two algorithms which we can apply here to solve the problem. These are  constraint specification and evolutionary algorithm.
+
+Constraint Specification
+Constraints are specific to the problem. Here are some examples.
+For example, the puzzle SEND + MORE = MONEY, after solving, will appear like this: 
+            S E N D
+            9 5 6 7
+          + M O R E
+            1 0 8 5
+          ---------
+          M O N E Y
+          1 0 6 5 2
+
+Search for "0" and "9" in additions or subtractions
+
+A good hint to find zero or 9 is to look for columns containing two or three identical letters. 
+Look at these additions: 
+    * * * A           * * * B
+ + * * * A      + * * * A
+    -------           -------
+    * * * A           * * * B
+The columns A+A=A and B+A=B indicate that A=zero. In math this is called the "additive identity property of zero"; it says that you add "0" to anything and it doesn't change, therefore it stays the same. 
+Now look at those same additions in the body of the cryptarithm: 
+    * A * *           * B * *
++ * A * *        + * A * *
+    -------           -------
+    * A * *           * B * *
+In these cases, we may have A=zero or A=9. It depends whether or not "carry 1" is received from the previous column. In other words, the "9" mimics zero every time it gets a carry-over of "1". 
+
+Search for "1" in additions
+
+Look for left hand digits. If single, they are probably "1". 
+Take the world's most famous cryptarithm: 
+           S E N D
+         + M O R E
+         ---------
+         M O N E Y
+"M" can only equal 1, because it is the "carry 1" from the column S+M=O (+10). In other words, every time an addition of "n" digits gives a total of "n+1" digits, the left hand digit of the total must be "1". 
+
+A blind search can eventually find the solutions, if there is any, in a bounded time. Given that the base of the number is 10, there may be 10n solutions to be checked in the problem space; where n is the number of unique letters or symbols in the problem. A rule based searching technique can provide the solution in minimum time.
+When constraints are applied  to the problem, if there are any, solution space to be searched reduces.
+
+And another Evolutionary Algorithm can be applied that is described below.
+
+An Evolutionary Algorithm (EA) is a common term for algorithms that utilize the adaptive behavior modeled after principles of nature.
+
+Although definition of Evolutionary Algorithm differs, the more common properties of EAs are that collections of potential solutions to the problem at hand are maintained.
+
+These solutions are referred to as the population of a current generation. Each potential solution is called a chromosome.
+
+Operations are applied to the current population to produce a new generation that will hopefully contain chromosomes that are better solutions of the problem. This process continues until some threshold value or stopping criterion is met. 
+
+The new population is produced through the operators on selected chromosomes of current generation. Typically, the chromosomes of the current generation, to whom the operators are applied, are chosen based on their quality. In this way, it is more likely that the offspring chromosomes inherit desirable characteristics of its parents. Some heuristics or fitness functions are used to choose parent chromosomes in a generation.
+
+So, a string of length 10 field by those letters and additional don’t care symbol(s) is a good choice. If the base of the number is n then we will use an array of length n. The position of the letters in the string denotes their value.
+S E N D M O R Y  _  _
+0 1  2  3  4 5  6  7  8  9
+Above ‘_’ (Underscore) is used as a don’t care symbol and the numbers just under the letters denote their position in the string as well as their respective values in the solution.
+
+
+
+Now we can generate two random numbers and interchange position of those letters as shown in figures below.
+
+Y  N  R M  _  O  E  D  _  S
+0   1  2  3  4   5   6  7  8  9
+Position of letters after mutuation
+Y  N  R  M  _  O  D  E  _  S
+0   1  2   3   4  5  6   7  8   9
+
+
+A Fitness function usually indicates the degree of correctness of a chromosome. An evaluation function can be easily formulated which will calculate the error of mathematical result in the problem.
+   S E N D
+   9 7 1 6
++ M O R E
+   3 5 2 7
+ -------------
+M O N E Y
+3 5 1 7 0
+
+ERROR = ABS (35170-(9716+3527)) = 21927
+
+Chromosome with minimum error is the fittest chromosome in a generation. To ensure that the offspring generation is not worse than the current one, the fittest chromosome of the current generation can be added to the next generation. But, this will introduce a deadlock  when these fittest chromosomes cannot lead to a solution, even though there exists a solution. Or problem called Local Minima So, a random chromosome can be given chance to contribute to the next generation. This modification will avoid the deadlock.
+
+ALGORITHM
+=======================
+Step 1: Scan the input strings.
+
+Step 2: Check out that input is proper.
+
+Step 3: Put the letters or symbols in ARRAY[10]
+
+Step 4: Apply arithmetic rules and try to reduce solution space.
+
+Step 5: If number of distinct letter is less than 10 then fill rest of the indices of ARRAY by don’t care symbols. This ARRAY[10] now is our current generation.
+
+Step 6: For several times generate two random numbers m,n and swap the contents of index m and n of any one chromosome of current generation and copy this new chromosome to next generation.
+
+Step 7: Evaluate the fitness of each chromosome of next generation and choose the best chromosomes. Now these best chromosomes become our current generation. Also include one random chromosome to the current generation. If there is no chromosome with error 0 in the current generation then go to step 6. If one of the chromosomes is found with error 0 then report the solution and exit.
+
+Limitation
+This program has still chance such that we can increase efficiency and get the output in minimum time.
+It finds maximum 10 distinct solution, if exist, not more than 10.
+This is limited to only addition and doesn’t solve subtraction or multiplication problem.
+This is also limited to solve problem which has two operands and can’t be used to solve for more than two operands in equation.
+
+References :
+INTERNATIONAL JOURNAL OF INFORMATION TECHNOLOGY VOLUME 1 NUMBER 1 2004 ISSN:1305-239X downloaded from internet.
+Artificial Intelligence by Kelvin Knight and Rich.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
